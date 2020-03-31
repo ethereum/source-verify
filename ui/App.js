@@ -3,32 +3,38 @@ import { useDropzone } from 'react-dropzone'
 import Select from 'react-select'
 
 export default function App() {
-    const chainOptions = [
-        { value: 'mainnet', label: 'Ethereum Mainnet' },
-        { value: 'ropsten', label: 'Ropsten' },
-        { value: 'rinkeby', label: 'Rinkeby' },
-        { value: 'kovan', label: 'Kovan' },
-        { value: 'goerli', label: 'Görli' }
-    ]
+  const chainOptions = [
+      { value: 'mainnet', label: 'Ethereum Mainnet' },
+      { value: 'ropsten', label: 'Ropsten' },
+      { value: 'rinkeby', label: 'Rinkeby' },
+      { value: 'kovan', label: 'Kovan' },
+      { value: 'goerli', label: 'Görli' }
+  ]
 
-    if (process.env.NODE_ENV === 'testing'){
-      chainOptions.push({
-        value: 'localhost',
-        label: 'localhost:8545'
-      })
-    }
+  if (process.env.NODE_ENV === 'testing'){
+    chainOptions.push({
+      value: 'localhost',
+      label: 'localhost:8545'
+    })
+  }
 
-    const { acceptedFiles, getRootProps, getInputProps } = useDropzone()
-    const [chain, updateChain] = useState(chainOptions[0])
-    const [address, updateAddress] = useState('')
-    const [loading, updateLoading] = useState(false)
-    const [error, updateError] = useState(null)
-    const url = process.env.SERVER_URL
-    const repositoryUrl = process.env.REPOSITORY_URL
-    const log = console.log
-    log(`Server URL: ${url}`)
+  const { acceptedFiles, getRootProps, getInputProps } = useDropzone()
+  const [chain, updateChain] = useState(chainOptions[0])
+  const [address, updateAddress] = useState('')
+  const [ens, updateENS] = useState(false)
+  const [loading, updateLoading] = useState(false)
+  const [error, updateError] = useState(null)
+  const url = process.env.SERVER_URL
+  const repositoryUrl = process.env.REPOSITORY_URL
+  const log = console.log
+  log(`Server URL: ${url}`)
 
   const [result, updateResult] = useState([])
+
+  function handleChange(e) {
+    updateENS(/[A-Za-z]\w+(.eth)$/.test(e.target.value))
+    updateAddress(e.target.value)
+  }
 
   function handleSubmit() {
     updateError(null)
@@ -40,11 +46,16 @@ export default function App() {
       formData.append('files', file)
     })
     formData.append('chain', chain.value)
-    if (address) formData.append('address', address)
+    if (address) {
+      formData.append('address', address)
+      formData.append('isENS', ens)
+    }
+
     try{
       fetch(`${url}`, {
         method: 'POST',
         body: formData
+
       })
         .then(res => res.json())
         .then(response => {
@@ -114,9 +125,9 @@ export default function App() {
             <input
               type="text"
               name="address"
-              placeholder="Contract Address (required)"
+              placeholder="Contract Address (optional for Mainnet) or ENS Address"
               value={address}
-              onChange={e => updateAddress(e.target.value)}
+              onChange={e => handleChange(e)}
             />
 
             <div {...getRootProps({ className: 'app-dropzone' })}>
