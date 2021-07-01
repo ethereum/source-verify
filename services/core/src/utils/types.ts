@@ -7,9 +7,13 @@ export interface FileObject {
     content?: string
   }
 
+export interface ChainAddressPair {
+  chain: string,
+  address: string,
+}
+
 export interface InputData {
-    chain: string,
-    addresses: string[],
+    chainAddressPairs: ChainAddressPair[],
     contract?: CheckedContract,
     bytecode?: string,
     creationData?: string,
@@ -49,7 +53,8 @@ export interface SourceMap {
 }
 
 export interface Match {
-  address: string | null,
+  chain: string,
+  address: string,
   status: Status,
   storageTimestamp?: Date,
   message?: string,
@@ -57,7 +62,7 @@ export interface Match {
   libraryMap?: StringMap
 }
 
-export type Status = 'perfect' | 'partial' | null;
+export type Status = 'perfect' | 'partial' | 'error' | null;
 
 /**
  * A type for specfifying the strictness level of querying (only full or any kind of matches)
