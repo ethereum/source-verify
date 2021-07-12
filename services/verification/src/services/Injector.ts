@@ -459,12 +459,21 @@ export class Injector {
                 });
             }
 
-            const finalDeploymentDatas: DeploymentData[] = this.getFinalDeploymentDatas(userDeploymentDatas, fetchedDeploymentDatas);
+            const { finalDeploymentDatas, incompleteDeploymentDatas } = this.getFinalDeploymentDatas(userDeploymentDatas, fetchedDeploymentDatas);
+
             const pendingMatches = await this.matchBytecodeToAddress(
                 finalDeploymentDatas,
                 compilationResult
             );
             matches.push(...pendingMatches);
+
+            for (const incompleteDeploymentData of incompleteDeploymentDatas) {
+                matches.push({
+                    address: incompleteDeploymentData.address,
+                    chain: incompleteDeploymentData.chain,
+                    status: undefined
+                });
+            }
         }
 
         // Since the bytecode matches, we can be sure that we got the right
@@ -558,9 +567,19 @@ export class Injector {
     private getFinalDeploymentDatas(
         userDeploymentDatas: DeploymentData[],
         fetchedDeploymentDatas: DeploymentData[]
-    ): DeploymentData[] {
+    ):  {
+            finalDeploymentDatas: DeploymentData[],
+            incompleteDeploymentDatas: DeploymentData[]
+        }
+        {
         const finalDeploymentDatas: DeploymentData[] = [];
+        const incompleteDeploymentDatas: DeploymentData[] = [];
         for (const userDeploymentData of userDeploymentDatas) {
+            if (!userDeploymentData.chain || !userDeploymentData.address) {
+                incompleteDeploymentDatas.push(userDeploymentData);
+                continue;
+            }
+
             let shouldProcess = true;
             for (const fetchedDeploymentData of fetchedDeploymentDatas) {
                 if (fetchedDeploymentData.equalsChainAddress(userDeploymentData)) {
@@ -574,7 +593,7 @@ export class Injector {
             }
         }
 
-        return finalDeploymentDatas;
+        return { finalDeploymentDatas, incompleteDeploymentDatas };
     }
 
     /**
