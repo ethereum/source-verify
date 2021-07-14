@@ -160,5 +160,17 @@ export default {
         "monitored": true,
         "contractFetchAddress": "https://cchain.explorer.avax.network/" + BLOCKSCOUT_SUFFIX,
         "txRegex": getBlockscoutRegex()
+    },
+    "40": {
+        "supported": true,
+        "monitored": false,
+        "contractFetchAddress": "https://mainnet.telos.net/v2/explore/evm/" + ETHERSCAN_SUFFIX,
+        "txRegex": ETHERSCAN_REGEX
+    },
+    "41": {
+        "supported": true,
+        "monitored": false,
+        "contractFetchAddress": "https://testnet.telos.net/v2/explore/evm/" + ETHERSCAN_SUFFIX,
+        "txRegex": ETHERSCAN_REGEX
     }
 }
